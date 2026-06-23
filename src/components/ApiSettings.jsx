@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Wifi, WifiOff, Eye, EyeOff, FlaskConical, CheckCircle, XCircle, Loader } from 'lucide-react'
+import { Wifi, Eye, EyeOff, FlaskConical, CheckCircle2, XCircle, Loader2, Activity } from 'lucide-react'
 import { saveCredentials, testConnection } from '../api/monnit'
 
 export default function ApiSettings({ onConnect }) {
@@ -7,132 +7,95 @@ export default function ApiSettings({ onConnect }) {
   const [apiSecretKey, setApiSecretKey] = useState('')
   const [showSecret, setShowSecret] = useState(false)
   const [testing, setTesting] = useState(false)
-  const [testResult, setTestResult] = useState(null) // null | 'ok' | 'error'
+  const [result, setResult] = useState(null) // null | 'ok' | 'error'
   const [errorMsg, setErrorMsg] = useState('')
 
   async function handleConnect() {
     if (!apiKeyId.trim() || !apiSecretKey.trim()) return
-    setTesting(true)
-    setTestResult(null)
+    setTesting(true); setResult(null)
     try {
       await testConnection(apiKeyId.trim(), apiSecretKey.trim())
       saveCredentials(apiKeyId.trim(), apiSecretKey.trim())
-      setTestResult('ok')
-      setTimeout(() => onConnect(apiKeyId.trim(), apiSecretKey.trim(), false), 800)
+      setResult('ok')
+      setTimeout(() => onConnect(apiKeyId.trim(), apiSecretKey.trim(), false), 700)
     } catch (err) {
-      setTestResult('error')
-      setErrorMsg(err.message || '接続に失敗しました')
+      setResult('error'); setErrorMsg(err.message || '接続に失敗しました')
     } finally {
       setTesting(false)
     }
   }
 
-  function handleTestMode() {
-    onConnect('TEST', 'TEST', true)
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-500/20 border border-blue-400/30 mb-4">
-            <Wifi className="w-8 h-8 text-blue-400" />
-          </div>
-          <h1 className="text-2xl font-bold text-white">iMONNIT ダッシュボード</h1>
-          <p className="text-slate-400 mt-1 text-sm">センサー監視・可視化システム</p>
+    <div className="min-h-screen grid lg:grid-cols-2">
+      {/* 左：ブランドパネル */}
+      <div className="hidden lg:flex flex-col justify-between bg-frame p-12 text-white relative overflow-hidden">
+        <div className="flex items-center gap-2">
+          <span className="grid place-items-center w-10 h-10 rounded-xl bg-accent"><Activity className="w-5 h-5" /></span>
+          <span className="font-display font-bold text-lg">iMONNIT</span>
         </div>
-
-        {/* Card */}
-        <div className="bg-white rounded-2xl shadow-2xl p-8">
-          <h2 className="text-lg font-semibold text-gray-800 mb-1">API接続設定</h2>
-          <p className="text-sm text-gray-500 mb-6">
-            iMONNITアカウントのAPIキーを入力してください
+        <div className="relative z-10">
+          <h1 className="font-display text-4xl font-bold leading-tight">現場の今を、<br />ひと目で。</h1>
+          <p className="text-white/60 mt-4 max-w-sm leading-relaxed">
+            温度・湿度・ドア・人感・漏水——あらゆるセンサーを、数字ではなく直感的なイメージで監視できます。
           </p>
+        </div>
+        <p className="text-white/40 text-sm relative z-10">センサー現場ビュー・モニタリングシステム</p>
+        {/* 装飾グロー */}
+        <div className="absolute -right-24 -bottom-24 w-96 h-96 rounded-full" style={{ background: 'radial-gradient(closest-side, rgba(79,70,229,.35), transparent)' }} />
+      </div>
 
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                APIキーID
-              </label>
-              <input
-                type="text"
-                value={apiKeyId}
-                onChange={(e) => setApiKeyId(e.target.value)}
-                placeholder="例: 12345678"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                APIシークレットキー
-              </label>
-              <div className="relative">
-                <input
-                  type={showSecret ? 'text' : 'password'}
-                  value={apiSecretKey}
-                  onChange={(e) => setApiSecretKey(e.target.value)}
-                  placeholder="APIシークレットキーを入力"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2.5 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowSecret(!showSecret)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  {showSecret ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
+      {/* 右：入力 */}
+      <div className="flex items-center justify-center p-6 lg:p-12">
+        <div className="w-full max-w-md">
+          <div className="lg:hidden flex items-center gap-2 mb-8">
+            <span className="grid place-items-center w-10 h-10 rounded-xl bg-accent text-white"><Activity className="w-5 h-5" /></span>
+            <span className="font-display font-bold text-lg">iMONNIT</span>
           </div>
 
-          {/* Result message */}
-          {testResult === 'ok' && (
-            <div className="mt-4 flex items-center gap-2 text-green-700 bg-green-50 border border-green-200 rounded-lg px-4 py-2.5 text-sm">
-              <CheckCircle className="w-4 h-4 flex-shrink-0" />
-              接続に成功しました。ダッシュボードを読み込んでいます...
+          <h2 className="font-display text-2xl font-bold">接続設定</h2>
+          <p className="text-ink-soft text-sm mt-1 mb-6">iMONNITアカウントのAPIキーを入力してください。</p>
+
+          <label className="block text-sm font-bold mb-1">APIキーID</label>
+          <input value={apiKeyId} onChange={(e) => setApiKeyId(e.target.value)} placeholder="例: 12345678"
+            className="w-full border border-line rounded-xl px-3.5 py-3 text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-accent" />
+
+          <label className="block text-sm font-bold mb-1">APIシークレットキー</label>
+          <div className="relative mb-1">
+            <input type={showSecret ? 'text' : 'password'} value={apiSecretKey} onChange={(e) => setApiSecretKey(e.target.value)}
+              placeholder="シークレットキーを入力"
+              className="w-full border border-line rounded-xl px-3.5 py-3 pr-11 text-sm focus:outline-none focus:ring-2 focus:ring-accent" />
+            <button type="button" onClick={() => setShowSecret((v) => !v)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-soft hover:text-ink" aria-label="表示切替">
+              {showSecret ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
+          </div>
+
+          {result === 'ok' && (
+            <div className="mt-3 flex items-center gap-2 rounded-xl px-3.5 py-2.5 text-sm" style={{ background: 'var(--st-normal-bg)', color: '#0f7a37' }}>
+              <CheckCircle2 className="w-4 h-4 shrink-0" /> 接続に成功しました。読み込んでいます…
             </div>
           )}
-          {testResult === 'error' && (
-            <div className="mt-4 flex items-start gap-2 text-red-700 bg-red-50 border border-red-200 rounded-lg px-4 py-2.5 text-sm">
-              <XCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-              <span>{errorMsg}</span>
+          {result === 'error' && (
+            <div className="mt-3 flex items-start gap-2 rounded-xl px-3.5 py-2.5 text-sm" style={{ background: 'var(--st-alert-bg)', color: '#b51d1d' }}>
+              <XCircle className="w-4 h-4 shrink-0 mt-0.5" /> <span>{errorMsg}</span>
             </div>
           )}
 
-          <button
-            onClick={handleConnect}
-            disabled={!apiKeyId.trim() || !apiSecretKey.trim() || testing}
-            className="w-full mt-5 btn-primary flex items-center justify-center gap-2 py-3 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {testing ? (
-              <><Loader className="w-4 h-4 animate-spin" /> 接続確認中...</>
-            ) : (
-              <><Wifi className="w-4 h-4" /> 接続する</>
-            )}
+          <button onClick={handleConnect} disabled={!apiKeyId.trim() || !apiSecretKey.trim() || testing}
+            className="btn-accent w-full mt-5 flex items-center justify-center gap-2 py-3 disabled:opacity-50 disabled:cursor-not-allowed">
+            {testing ? <><Loader2 className="w-4 h-4 animate-spin" /> 接続確認中…</> : <><Wifi className="w-4 h-4" /> 接続する</>}
           </button>
 
-          <div className="relative my-5">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-200" />
-            </div>
-            <div className="relative flex justify-center text-xs text-gray-400 bg-white px-2">
-              または
-            </div>
+          <div className="flex items-center gap-3 my-5 text-xs text-ink-soft">
+            <div className="flex-1 border-t border-line" /> または <div className="flex-1 border-t border-line" />
           </div>
 
-          <button
-            onClick={handleTestMode}
-            className="w-full btn-secondary flex items-center justify-center gap-2 py-3"
-          >
-            <FlaskConical className="w-4 h-4" />
-            テストモードで試す（デモデータ）
+          <button onClick={() => onConnect('TEST', 'TEST', true)}
+            className="btn-ghost w-full flex items-center justify-center gap-2 py-3">
+            <FlaskConical className="w-4 h-4" /> テストモードで試す（デモデータ）
           </button>
 
-          <p className="text-xs text-gray-400 mt-4 text-center">
-            APIキーはiMONNITアカウントの設定画面で取得できます
-          </p>
+          <p className="text-xs text-ink-soft mt-4 text-center">APIキーはiMONNITアカウントの設定画面で取得できます。</p>
         </div>
       </div>
     </div>

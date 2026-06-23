@@ -3,46 +3,37 @@ import { formatDistanceToNow } from 'date-fns'
 import { ja } from 'date-fns/locale'
 
 export default function GatewayStatus({ gateways, networks }) {
-  const networkMap = Object.fromEntries(networks.map((n) => [n.networkID, n.networkName]))
+  const netMap = Object.fromEntries(networks.map((n) => [n.networkID, n.networkName]))
 
   return (
-    <div className="card">
+    <div className="panel p-5">
       <div className="flex items-center gap-2 mb-4">
-        <Router className="w-4 h-4 text-gray-500" />
-        <h3 className="font-semibold text-gray-800">ゲートウェイ状態</h3>
-        <span className="ml-auto text-xs text-gray-400">{gateways.length} 台</span>
+        <Router className="w-4 h-4 text-ink-soft" />
+        <h3 className="font-display font-bold">ゲートウェイ</h3>
+        <span className="ml-auto text-xs text-ink-soft">{gateways.length} 台</span>
       </div>
       <div className="space-y-3">
         {gateways.map((gw) => {
-          const isOnline = gw.status === 1
-          const lastSeen = formatDistanceToNow(new Date(gw.lastCommunicationDate), {
-            addSuffix: true,
-            locale: ja,
-          })
+          const online = gw.status === 1
+          const when = formatDistanceToNow(new Date(gw.lastCommunicationDate), { addSuffix: true, locale: ja })
           return (
-            <div key={gw.gatewayID} className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 border border-gray-100">
-              <div className={`p-2 rounded-lg ${isOnline ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-500'}`}>
-                {isOnline ? <Wifi className="w-4 h-4" /> : <WifiOff className="w-4 h-4" />}
-              </div>
+            <div key={gw.gatewayID} className="flex items-center gap-3 p-3 rounded-xl border border-line bg-[#fafcfc]">
+              <span className="grid place-items-center w-10 h-10 rounded-xl"
+                style={{ background: online ? 'var(--st-normal-bg)' : 'var(--st-alert-bg)', color: online ? 'var(--st-normal)' : 'var(--st-alert)' }}>
+                {online ? <Wifi className="w-5 h-5" /> : <WifiOff className="w-5 h-5" />}
+              </span>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-800 truncate">{gw.gatewayName}</p>
-                <p className="text-xs text-gray-500">{networkMap[gw.networkID] || `ネットワーク ${gw.networkID}`}</p>
+                <p className="text-sm font-bold truncate">{gw.gatewayName}</p>
+                <p className="text-xs text-ink-soft">{netMap[gw.networkID] || `ネットワーク ${gw.networkID}`}・FW {gw.firmwareVersion}</p>
               </div>
-              <div className="text-right flex-shrink-0">
-                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${isOnline ? 'status-normal' : 'status-alert'}`}>
-                  {isOnline ? 'オンライン' : 'オフライン'}
-                </span>
-                <p className="text-xs text-gray-400 mt-1 flex items-center gap-1 justify-end">
-                  <Clock className="w-3 h-3" />
-                  {lastSeen}
-                </p>
+              <div className="text-right shrink-0">
+                <span className={`chip ${online ? 'chip-normal' : 'chip-alert'}`}>{online ? 'オンライン' : 'オフライン'}</span>
+                <p className="text-[11px] text-ink-soft mt-1 flex items-center gap-1 justify-end"><Clock className="w-3 h-3" /> {when}</p>
               </div>
             </div>
           )
         })}
-        {gateways.length === 0 && (
-          <p className="text-sm text-gray-400 text-center py-4">ゲートウェイが見つかりません</p>
-        )}
+        {gateways.length === 0 && <p className="text-sm text-ink-soft text-center py-6">ゲートウェイが見つかりません</p>}
       </div>
     </div>
   )

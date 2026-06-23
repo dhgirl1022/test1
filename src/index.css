@@ -2,39 +2,135 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ===========================================================
+   Tactile Instrument Panel — design tokens
+   状態色 = 情報。ブランド色(indigo)は操作要素のみに使用。
+   =========================================================== */
+:root {
+  --frame: #16282e;        /* deep slate-teal housing */
+  --frame-soft: #20383f;
+  --ground: #e7ecef;       /* cool light panel surface */
+  --panel: #ffffff;
+  --text: #16282e;
+  --text-soft: #5d6f76;
+  --accent: #4f46e5;       /* indigo — interactive only */
+  --line: #d4dbdf;
+
+  /* semantic status (the real accent system) */
+  --st-normal: #16a34a;
+  --st-normal-bg: #dcfce7;
+  --st-warning: #d97706;
+  --st-warning-bg: #fef3c7;
+  --st-alert: #dc2626;
+  --st-alert-bg: #fee2e2;
+  --st-offline: #94a3b8;
+  --st-offline-bg: #eef2f4;
+
+  --shadow-soft: 0 1px 2px rgba(22, 40, 46, 0.06), 0 6px 20px rgba(22, 40, 46, 0.06);
+  --shadow-lift: 0 8px 30px rgba(22, 40, 46, 0.14);
+}
+
 @layer base {
+  html { -webkit-text-size-adjust: 100%; }
   body {
-    @apply bg-gray-100 text-gray-900;
-    font-family: 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+    background: var(--ground);
+    color: var(--text);
+    font-family: 'Noto Sans JP', 'Hiragino Kaku Gothic ProN', Meiryo, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  /* numeric / display readouts */
+  .font-readout {
+    font-family: 'Space Grotesk', 'Noto Sans JP', sans-serif;
+    font-feature-settings: 'tnum' 1;
+    letter-spacing: -0.01em;
+  }
+  .font-display {
+    font-family: 'Space Grotesk', 'Noto Sans JP', sans-serif;
+    letter-spacing: -0.015em;
   }
 }
 
 @layer components {
-  .status-normal {
-    @apply bg-green-100 text-green-800 border border-green-200;
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    box-shadow: var(--shadow-soft);
   }
-  .status-warning {
-    @apply bg-yellow-100 text-yellow-800 border border-yellow-200;
+  .btn-accent {
+    background: var(--accent);
+    color: #fff;
+    font-weight: 600;
+    padding: 0.55rem 1rem;
+    border-radius: 12px;
+    transition: filter .15s, transform .05s;
   }
-  .status-alert {
-    @apply bg-red-100 text-red-800 border border-red-200;
+  .btn-accent:hover { filter: brightness(1.08); }
+  .btn-accent:active { transform: translateY(1px); }
+  .btn-ghost {
+    background: var(--panel);
+    color: var(--text);
+    font-weight: 600;
+    padding: 0.55rem 1rem;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    transition: background .15s;
   }
-  .status-offline {
-    @apply bg-gray-100 text-gray-500 border border-gray-200;
-  }
-  .card {
-    @apply bg-white rounded-xl shadow-sm border border-gray-200 p-5;
-  }
-  .btn-primary {
-    @apply bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg transition-colors;
-  }
-  .btn-secondary {
-    @apply bg-white hover:bg-gray-50 text-gray-700 font-medium px-4 py-2 rounded-lg border border-gray-300 transition-colors;
+  .btn-ghost:hover { background: #f3f6f7; }
+
+  .chip {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 0.18rem 0.6rem;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
   }
 }
 
-/* Scrollbar */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: #f1f5f9; }
-::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+/* status helpers */
+.tone-normal  { color: var(--st-normal); }
+.tone-warning { color: var(--st-warning); }
+.tone-alert   { color: var(--st-alert); }
+.tone-offline { color: var(--st-offline); }
+.chip-normal  { background: var(--st-normal-bg);  color: #0f7a37; }
+.chip-warning { background: var(--st-warning-bg); color: #9a5a06; }
+.chip-alert   { background: var(--st-alert-bg);   color: #b51d1d; }
+.chip-offline { background: var(--st-offline-bg); color: #5d6f76; }
+
+/* ===========================================================
+   Instrument animations
+   =========================================================== */
+@keyframes pulse-ring {
+  0%   { transform: scale(0.4); opacity: 0.7; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+@keyframes alert-glow {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.45; }
+}
+@keyframes radar-sweep {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes float-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.anim-alert-glow { animation: alert-glow 1.4s ease-in-out infinite; }
+.anim-float-in   { animation: float-in .35s ease both; }
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #c2ccd0; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #a6b3b8; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
